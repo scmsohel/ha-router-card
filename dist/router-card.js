@@ -129,6 +129,8 @@ const ICONS = {
   restart: "M12,4C14.1,4 16.1,4.8 17.6,6.3C20.7,9.4 20.7,14.5 17.6,17.6C15.8,19.5 13.3,20.2 10.9,19.9L11.4,17.9C13.1,18.1 14.9,17.5 16.2,16.2C18.5,13.9 18.5,10.1 16.2,7.7C15.1,6.6 13.5,6 12,6V10.6L7,5.6L12,0.6V4M6.3,17.6C3.7,15 3.3,11 5.1,7.9L6.6,9.4C5.5,11.6 5.9,14.4 7.8,16.2C8.3,16.7 8.9,17.1 9.6,17.4L9,19.4C8,19 7.1,18.4 6.3,17.6Z",
   // mdi:chip, for the system section.
   chip: "M6,4H18V5H21V7H18V9H21V11H18V13H21V15H18V17H21V19H18V20H6V19H3V17H6V15H3V13H6V11H3V9H6V7H3V5H6V4M11,15V18H12V15H11M13,15V18H14V15H13M15,15V18H16V15H15Z",
+  // mdi:memory, for RAM usage in the compact card.
+  ram: "M2,7H4V5H6V3H8V5H10V3H12V5H14V3H16V5H18V3H20V5H22V7H24V17H22V19H20V21H18V19H16V21H14V19H12V21H10V19H8V21H6V19H4V17H2V7M6,9V15H8V9H6M10,9V15H12V9H10M14,9V15H16V9H14M18,9V15H20V9H18Z",
   // mdi:access-point-network, for the mesh / network devices section.
   mesh: "M4.93,2.93C3.12,4.74 2,7.24 2,10C2,12.76 3.12,15.26 4.93,17.07L6.34,15.66C4.89,14.22 4,12.22 4,10C4,7.79 4.89,5.78 6.34,4.34L4.93,2.93M19.07,2.93L17.66,4.34C19.11,5.78 20,7.79 20,10C20,12.22 19.11,14.22 17.66,15.66L19.07,17.07C20.88,15.26 22,12.76 22,10C22,7.24 20.88,4.74 19.07,2.93M7.76,5.76C6.67,6.85 6,8.35 6,10C6,11.65 6.67,13.15 7.76,14.24L9.17,12.83C8.45,12.11 8,11.11 8,10C8,8.89 8.45,7.89 9.17,7.17L7.76,5.76M16.24,5.76L14.83,7.17C15.55,7.89 16,8.89 16,10C16,11.11 15.55,12.11 14.83,12.83L16.24,14.24C17.33,13.15 18,11.65 18,10C18,8.35 17.33,6.85 16.24,5.76M12,8A2,2 0 0,0 10,10A2,2 0 0,0 12,12A2,2 0 0,0 14,10A2,2 0 0,0 12,8M11,14V18H10A1,1 0 0,0 9,19H2V21H9A1,1 0 0,0 10,22H14A1,1 0 0,0 15,21H22V19H15A1,1 0 0,0 14,18H13V14H11Z",
   // mdi:update, the firmware update chip.
@@ -2363,6 +2365,7 @@ const PROFILES = {
       rate_down: "total_down_speed",
       rate_up: "total_up_speed",
       ip: "wan_ip",
+      ram: "ram_usage",
       clients: "device_count",
     },
   },
@@ -4135,6 +4138,11 @@ class RouterMiniCard extends RouterCard {
         foot.push(`<span class="clickable ${this._level(cpu, "cpu")}" role="button" tabindex="0" data-key="cpu" data-entity="${refId(sc.cpu)}" title="${esc(this._t("cpu"))}">${svgIcon(
           ICONS.chip
         )}${Math.round(cpu)}%</span>`);
+      const ram = num(this._s(sc.ram));
+      if (ram !== null)
+        foot.push(`<span class="clickable ${this._level(ram, "ram")}" role="button" tabindex="0" data-key="ram" data-entity="${refId(sc.ram)}" title="${esc(this._t("ent_ram"))}">${svgIcon(
+          ICONS.ram
+        )}${Math.round(ram)}%</span>`);
       let hottest = null;
       for (const tmp of box.temps) {
         const v = temperature(this._s(tmp.id));
@@ -4151,12 +4159,6 @@ class RouterMiniCard extends RouterCard {
       foot.push(`<span data-key="clients"${cl.entity ? ` class="clickable" role="button" tabindex="0" data-entity="${cl.entity}"` : ""} title="${esc(label)}" aria-label="${esc(label)}">${svgIcon(
         ICONS.devices
       )}${cl.n}</span>`);
-    }
-    const nodes = this._nodesUp(box);
-    if (nodes) {
-      const label = `${this._t(box.kind === "mesh" ? "mesh" : "network_devices")} · ${nodes.online} / ${nodes.total}`;
-      const cls = nodes.online === nodes.total ? "ok" : "warn";
-      foot.push(`<span class="${cls}" data-key="nodes" title="${esc(label)}" aria-label="${esc(label)}">${svgIcon(ICONS.mesh)}${nodes.online}/${nodes.total}</span>`);
     }
     const up = this._uptime(box);
     if (up !== null) foot.push(`<span data-key="uptime">${svgIcon(ICONS.timer)}${fmtUptime(up, this._hass, this._config)}</span>`);
