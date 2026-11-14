@@ -3840,7 +3840,7 @@ class RouterCard extends RouterBase {
     if (!box.id) return this._noBox();
     const c = this._config;
     const sc = box.scalars;
-    const hist = c.show_history === false ? null : this._history([sc.rate_down, sc.rate_up, sc.cpu, sc.ram, sc.disk]);
+    const hist = c.show_history === false ? null : this._history([sc.rate_down, sc.rate_up, sc.cpu, sc.ram, sc.disk, sc.clients]);
     const parts = [];
     if (c.show_network !== false) parts.push(this._network(box, hist));
     if (c.show_system !== false) parts.push(this._system(box, hist));
@@ -3931,6 +3931,17 @@ class RouterCard extends RouterBase {
       if (!sc[slot]) continue;
       const v = num(this._s(sc[slot]));
       gauges.push(this._gauge(sc[slot], v, v === null ? "—" : `${Math.round(v)}%`, this._t(label), this._level(v, slot), hist));
+    }
+    const cl = this._clients(box);
+    if (sc.clients && cl?.n !== null && cl?.n !== undefined) {
+      const id = refId(sc.clients);
+      const value = cl.n === null ? "—" : String(Math.round(cl.n));
+      gauges.push(`<div class="gauge clickable ${this._level(cl.n, "clients")}" role="button" tabindex="0" data-key="clients" data-entity="${id}" title="${esc(this._t("clients"))}">
+        ${hist ? spark(hist[sc.clients], hist.end) : ""}
+        ${ring(100)}
+        <div class="val"><b>${esc(value)}</b></div>
+        <div class="lbl">${esc(this._t("clients"))}</div>
+      </div>`);
     }
     for (const { id, name } of box.temps) {
       // Thresholds and gauge (0-100) in °C, whatever unit the sensor reports; the value in its own unit.
@@ -4109,7 +4120,7 @@ class RouterMiniCard extends RouterCard {
     const parts = [];
     if (c.show_network !== false && (sc.rate_down || sc.rate_up)) {
       // The same 24 h curves as the full card, behind the compact rate tiles.
-      const hist = c.show_history === false ? null : this._history([sc.rate_down, sc.rate_up, sc.cpu, sc.ram, sc.disk]);
+      const hist = c.show_history === false ? null : this._history([sc.rate_down, sc.rate_up, sc.cpu, sc.ram, sc.disk, sc.clients]);
       parts.push(`<div class="grid2">${this._rateTiles(sc, hist)}</div>`);
     }
     const foot = [];
