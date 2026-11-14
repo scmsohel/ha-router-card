@@ -2346,6 +2346,16 @@ const OMADA_KINDS = [
   { kind: "ap", re: /\b(eap|access point)/i },
 ];
 const PROFILES = {
+  cudy_router: {
+    name: "Cudy", kind: "router", color: "#e53935", logo: "",
+    website: "https://www.cudy.com", admin: null,
+    // Cudy Router exposes stable translation keys for its aggregate traffic and client count.
+    keys: {
+      rate_down: "total_down_speed",
+      rate_up: "total_up_speed",
+      clients: "device_count",
+    },
+  },
   firewalla_local: {
     name: "Firewalla", kind: "firewall", color: "#c8332d", logo: "__IMG_FILE:firewalla.svg__",
     website: "https://firewalla.com", admin: null,
