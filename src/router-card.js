@@ -3938,7 +3938,7 @@ class RouterCard extends RouterBase {
       const value = cl.n === null ? "—" : String(Math.round(cl.n));
       gauges.push(`<div class="gauge clickable ${this._level(cl.n, "clients")}" role="button" tabindex="0" data-key="clients" data-entity="${id}" title="${esc(this._t("clients"))}">
         ${hist ? spark(hist[sc.clients], hist.end) : ""}
-        ${ring(100)}
+        ${ring(cl.n === null ? null : (cl.n / Math.max(1, threshold(this._config, "clients_critical"))) * 100)}
         <div class="val"><b>${esc(value)}</b></div>
         <div class="lbl">${esc(this._t("clients"))}</div>
       </div>`);
