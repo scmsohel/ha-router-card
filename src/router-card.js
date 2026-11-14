@@ -2353,6 +2353,7 @@ const PROFILES = {
     keys: {
       rate_down: "total_down_speed",
       rate_up: "total_up_speed",
+      ip: "wan_ip",
       clients: "device_count",
     },
   },
