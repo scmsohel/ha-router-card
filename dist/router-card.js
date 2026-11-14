@@ -2349,7 +2349,14 @@ const PROFILES = {
   cudy_router: {
     name: "Cudy", kind: "router", color: "#e53935", logo: "",
     website: "https://www.cudy.com", admin: null,
-    // Cudy Router exposes stable translation keys for its aggregate traffic and client count.
+    // Prefer the user's known Cudy entities; translation-key and word matching remain as fallbacks for other Cudy devices.
+    entity_ids: {
+      "sensor.mesh_0726_total_download_speed": "rate_down",
+      "sensor.mesh_0726_total_upload_speed": "rate_up",
+      "sensor.mesh_0726_wan_ip": "ip",
+      "sensor.mesh_0726_device_count": "clients",
+      "sensor.cudy_router_wan_status": "wan",
+    },
     keys: {
       rate_down: "total_down_speed",
       rate_up: "total_up_speed",
@@ -2790,6 +2797,8 @@ const classify = (hass, profile, e, own) => {
   const s = hass.states[id];
   const a = s?.attributes || {};
   const k = e.translation_key;
+  const explicitSlot = profile.entity_ids?.[id];
+  if (explicitSlot) return { slot: explicitSlot, score: 100 };
   if (excluded(profile, e)) return null;
   for (const [slot, keys] of Object.entries(profile.keys || {})) {
     if (k && (Array.isArray(keys) ? keys.includes(k) : keys === k)) return own || slot.startsWith("rate_") ? { slot, score: 20 } : null;
