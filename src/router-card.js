@@ -242,6 +242,8 @@ const STRINGS = {
     lang_auto: "Automatic",
     cpu_warning: "CPU warning (%)",
     cpu_critical: "CPU critical (%)",
+    clients_warning: "Clients warning (devices)",
+    clients_critical: "Clients critical (devices)",
     ram_warning: "RAM warning (%)",
     ram_critical: "RAM critical (%)",
     disk_warning: "Disk warning (% used)",
@@ -2601,7 +2603,7 @@ const level = (v, warn, crit) => (v === null ? "" : v >= crit ? "crit" : v >= wa
 
 // Default warning / critical thresholds: CPU, RAM and disk in % used, temperatures in °C. Each can be set in the card
 // options, named as on the other cards (system monitor, NAS, internet box).
-const THRESHOLDS = { cpu_warning: 80, cpu_critical: 95, ram_warning: 80, ram_critical: 90, disk_warning: 80, disk_critical: 90, temp_warning: 75, temp_critical: 90 };
+const THRESHOLDS = { cpu_warning: 80, cpu_critical: 95, clients_warning: 50, clients_critical: 80, ram_warning: 80, ram_critical: 90, disk_warning: 80, disk_critical: 90, temp_warning: 75, temp_critical: 90 };
 
 /** A threshold option as a number, or its default when unset or not a number. */
 const threshold = (config, key) => {
@@ -4214,7 +4216,7 @@ class RouterEditorBase extends HTMLElement {
         name: "",
         schema: Object.keys(THRESHOLDS).map((name) => ({
           name,
-          selector: { number: { min: 0, max: name.startsWith("temp") ? 150 : 100, step: 1, mode: "box", unit_of_measurement: name.startsWith("temp") ? "°C" : "%" } },
+          selector: { number: { min: 0, max: name.startsWith("temp") ? 150 : 100, step: 1, mode: "box", unit_of_measurement: name.startsWith("temp") ? "°C" : name.startsWith("clients") ? "devices" : "%" } },
         })),
       },
       // Sensors of the user's choice, replacing those found on the router (the WAN interface of a MikroTik…), and
