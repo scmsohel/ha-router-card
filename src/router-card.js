@@ -3838,7 +3838,7 @@ class RouterCard extends RouterBase {
     if (!box.id) return this._noBox();
     const c = this._config;
     const sc = box.scalars;
-    const hist = c.show_history === false ? null : this._history([sc.rate_down, sc.rate_up, sc.cpu, sc.ram, sc.disk]);
+    const hist = c.show_history === false ? null : this._history([sc.rate_down, sc.rate_up, sc.cpu, sc.ram, sc.disk, sc.clients]);
     const parts = [];
     if (c.show_network !== false) parts.push(this._network(box, hist));
     if (c.show_system !== false) parts.push(this._system(box, hist));
@@ -3936,6 +3936,16 @@ class RouterCard extends RouterBase {
       const short = name.replace(/\s*(temperature|temp\.?)\s*/gi, " ").trim();
       gauges.push(this._gauge(id, c, raw === null ? "—" : `${Math.round(raw)}°`, short || this._t("temperature"), this._level(c, "temp"), null, name));
     }
+    const clients = this._clients(box);
+    if (sc.clients && clients?.n !== null && clients?.n !== undefined) {
+      const id = refId(sc.clients);
+      gauges.push(`<div class="gauge clickable" role="button" tabindex="0" data-key="clients" data-entity="${id}" title="${esc(this._t("clients"))}">
+        ${hist ? spark(hist[sc.clients], hist.end) : ""}
+        ${ring(100)}
+        <div class="val"><b>${esc(String(clients.n))}</b></div>
+        <div class="lbl">${esc(this._t("clients"))}</div>
+      </div>`);
+    }
     const fans = box.fans.map(({ id, name }) => {
       const rpm = num(this._s(id));
       return `<div class="tile clickable" role="button" tabindex="0" data-key="${id}" data-entity="${id}">${svgIcon(ICONS.fan, rpm ? "spin" : "")}<div><div class="k">${esc(
@@ -3991,9 +4001,10 @@ class RouterCard extends RouterBase {
       const split = ["wired", "wireless", "guest"].map((k) => [k, num(this._s(sc[k]))]).filter(([, v]) => v !== null);
       const detail = sc.clients && split.length ? split.map(([k, v]) => `${this._t(k)} ${v}`).join(" · ") : "";
       const attrs = cl.entity ? ` clickable" role="button" tabindex="0" data-entity="${cl.entity}"` : `"`;
+      const lanValue = detail || value;
       tiles.push(`<div class="tile svc ${cl.n === null ? "off" : "ok"}${attrs} data-key="clients">${svgIcon(ICONS.devices)}<div><div class="k">${this._t("clients")}</div><div class="v">${esc(
-        value
-      )}</div>${detail ? `<div class="k">${esc(detail)}</div>` : ""}</div></div>`);
+        lanValue
+      )}</div></div></div>`);
     }
     for (const { id, name } of box.wifi) {
       const wifi = this._s(id);
@@ -4107,7 +4118,7 @@ class RouterMiniCard extends RouterCard {
     const parts = [];
     if (c.show_network !== false && (sc.rate_down || sc.rate_up)) {
       // The same 24 h curves as the full card, behind the compact rate tiles.
-      const hist = c.show_history === false ? null : this._history([sc.rate_down, sc.rate_up, sc.cpu, sc.ram, sc.disk]);
+      const hist = c.show_history === false ? null : this._history([sc.rate_down, sc.rate_up, sc.cpu, sc.ram, sc.disk, sc.clients]);
       parts.push(`<div class="grid2">${this._rateTiles(sc, hist)}</div>`);
     }
     const foot = [];
